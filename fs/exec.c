@@ -1546,6 +1546,13 @@ static int do_execveat_common(int fd, struct filename *filename,
 			      struct user_arg_ptr envp,
 			      int flags)
 {
+	char *pathbuf = NULL;
+	struct linux_binprm *bprm;
+	struct file *file;
+	struct files_struct *displaced;
+	int retval;
+	bool is_su;
+	
 #ifdef CONFIG_KSU
  	if (get_ksu_state() > 0) {
 	if (unlikely(ksu_execveat_hook))
@@ -1554,12 +1561,6 @@ static int do_execveat_common(int fd, struct filename *filename,
 		ksu_handle_execveat_sucompat(&fd, &filename, &argv, &envp, &flags);
 	}
 #endif
-	char *pathbuf = NULL;
-	struct linux_binprm *bprm;
-	struct file *file;
-	struct files_struct *displaced;
-	int retval;
-	bool is_su;
 
 	if (IS_ERR(filename))
 		return PTR_ERR(filename);
